@@ -96,4 +96,17 @@ describe('API Routes Integration', () => {
     const res = await fetch(`${baseUrl}/api/hotels`);
     assert.strictEqual(res.status, 400);
   });
+
+  test('GET /docs returns 200/301 for Swagger documentation', async () => {
+    const res = await fetch(`${baseUrl}/docs/`);
+    assert.strictEqual(res.status, 200);
+  });
+
+  test('GET /openapi.json returns valid OpenAPI 3 schema', async () => {
+    const res = await fetch(`${baseUrl}/openapi.json`);
+    assert.strictEqual(res.status, 200);
+    const schema = (await res.json()) as any;
+    assert.strictEqual(schema.openapi, '3.0.3');
+    assert.ok(schema.paths['/api/hotels']);
+  });
 });

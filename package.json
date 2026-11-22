@@ -21,12 +21,14 @@
     "@temporalio/workflow": "^1.26.0",
     "dotenv": "^18.0.10",
     "express": "^5.3.0",
-    "ioredis": "^6.0.0"
+    "ioredis": "^6.0.0",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/ioredis": "^4.28.10",
     "@types/node": "^26.6.6",
+    "@types/swagger-ui-express": "^4.1.8",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2"
   }
