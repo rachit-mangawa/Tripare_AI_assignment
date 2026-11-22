@@ -55,14 +55,6 @@ Backend service that queries two hotel suppliers concurrently, deduplicates list
 
 ## Endpoints
 
-### 0. API Documentation (Swagger)
-
-* `GET /docs`
-  Interactive Swagger UI to test and inspect all endpoints and schemas in browser.
-
-* `GET /openapi.json`
-  Raw OpenAPI 3.0.3 specification JSON.
-
 ### 1. Main Endpoints
 
 * `GET /api/hotels?city=delhi`
