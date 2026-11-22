@@ -1,0 +1,169 @@
+{
+  "info": {
+    "_postman_id": "b8a96677-4482-416b-bfa0-c0be36c53e02",
+    "name": "Hotel Offer Orchestrator API",
+    "description": "Postman test collection for Hotel Offer Orchestrator backend with Redis and Temporal.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. GET Hotels (Valid City with Overlaps)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/hotels?city=delhi",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "hotels"],
+          "query": [
+            {
+              "key": "city",
+              "value": "delhi"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "2. GET Hotels (Price Filter via Redis)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/hotels?city=delhi&minPrice=5000&maxPrice=6000",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "hotels"],
+          "query": [
+            {
+              "key": "city",
+              "value": "delhi"
+            },
+            {
+              "key": "minPrice",
+              "value": "5000"
+            },
+            {
+              "key": "maxPrice",
+              "value": "6000"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "3. GET Hotels (City with No Results)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/hotels?city=atlantis",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "hotels"],
+          "query": [
+            {
+              "key": "city",
+              "value": "atlantis"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "4. GET Health Check (Bonus)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["health"]
+        }
+      }
+    },
+    {
+      "name": "5. Mock Supplier A",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/supplierA/hotels?city=delhi",
+          "host": ["{{baseUrl}}"],
+          "path": ["supplierA", "hotels"],
+          "query": [
+            {
+              "key": "city",
+              "value": "delhi"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "6. Mock Supplier B",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/supplierB/hotels?city=delhi",
+          "host": ["{{baseUrl}}"],
+          "path": ["supplierB", "hotels"],
+          "query": [
+            {
+              "key": "city",
+              "value": "delhi"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "7. Simulate Supplier B Down",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"supplier\": \"B\",\n  \"down\": true\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/supplier/simulate-down",
+          "host": ["{{baseUrl}}"],
+          "path": ["supplier", "simulate-down"]
+        }
+      }
+    },
+    {
+      "name": "8. Restore Supplier B Up",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"supplier\": \"B\",\n  \"down\": false\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/supplier/simulate-down",
+          "host": ["{{baseUrl}}"],
+          "path": ["supplier", "simulate-down"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ]
+}
