@@ -53,4 +53,47 @@ describe('API Routes Integration', () => {
     assert.strictEqual(data.suppliers.supplierA, 'UP');
     assert.strictEqual(data.suppliers.supplierB, 'UP');
   });
+
+  test('GET /api/hotels returns deduplicated hotel list for valid city', async () => {
+    const res = await fetch(`${baseUrl}/api/hotels?city=delhi`);
+    assert.strictEqual(res.status, 200);
+    const data = (await res.json()) as any[];
+    assert.ok(Array.isArray(data));
+    assert.ok(data.length > 0);
+
+    // Holtin should pick Supplier B (cheaper: 5340 vs 6000)
+    const holtin = data.find((h) => h.name === 'Holtin');
+    assert.ok(holtin);
+    assert.strictEqual(holtin.price, 5340);
+    assert.strictEqual(holtin.supplier, 'Supplier B');
+
+    // Radison should pick Supplier A (cheaper: 5900 vs 6200)
+    const radison = data.find((h) => h.name === 'Radison');
+    assert.ok(radison);
+    assert.strictEqual(radison.price, 5900);
+    assert.strictEqual(radison.supplier, 'Supplier A');
+  });
+
+  test('GET /api/hotels filters by price range', async () => {
+    const res = await fetch(`${baseUrl}/api/hotels?city=delhi&minPrice=5000&maxPrice=5500`);
+    assert.strictEqual(res.status, 200);
+    const data = (await res.json()) as any[];
+    assert.ok(Array.isArray(data));
+    for (const h of data) {
+      assert.ok(h.price >= 5000 && h.price <= 5500);
+    }
+  });
+
+  test('GET /api/hotels returns empty array for city with no results', async () => {
+    const res = await fetch(`${baseUrl}/api/hotels?city=atlantis`);
+    assert.strictEqual(res.status, 200);
+    const data = (await res.json()) as any[];
+    assert.ok(Array.isArray(data));
+    assert.strictEqual(data.length, 0);
+  });
+
+  test('GET /api/hotels returns 400 when city param is missing', async () => {
+    const res = await fetch(`${baseUrl}/api/hotels`);
+    assert.strictEqual(res.status, 400);
+  });
 });

@@ -23,10 +23,19 @@ hotelsRouter.get('/hotels', async (req: Request, res: Response) => {
       // Check if hotels are already cached in Redis
       let hotels = await getHotelsFromRedis(city, minPrice, maxPrice);
 
-      // If Redis has no data for this city yet, trigger orchestration first
+      // If Redis has no data for this city yet, trigger orchestration
       if (hotels.length === 0) {
-        await executeHotelOrchestration(city);
+        const orchestrated = await executeHotelOrchestration(city);
         hotels = await getHotelsFromRedis(city, minPrice, maxPrice);
+
+        // Fallback filter in memory if Redis is offline during local dev
+        if (hotels.length === 0 && orchestrated.length > 0) {
+          hotels = orchestrated.filter((h) => {
+            if (minPrice !== undefined && h.price < minPrice) return false;
+            if (maxPrice !== undefined && h.price > maxPrice) return false;
+            return true;
+          });
+        }
       }
 
       return res.json(hotels);

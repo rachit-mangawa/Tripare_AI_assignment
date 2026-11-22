@@ -11,19 +11,20 @@ export async function saveHotelsToRedis(
   city: string,
   hotels: DeduplicatedHotel[]
 ): Promise<void> {
-  const key = getCityKey(city);
+  try {
+    const key = getCityKey(city);
+    const pipeline = redis.pipeline();
+    pipeline.del(key);
 
-  const pipeline = redis.pipeline();
-  // Clear old city entries first
-  pipeline.del(key);
+    for (const hotel of hotels) {
+      pipeline.zadd(key, hotel.price, JSON.stringify(hotel));
+    }
 
-  for (const hotel of hotels) {
-    // Store JSON as member and price as score for native Redis range filtering
-    pipeline.zadd(key, hotel.price, JSON.stringify(hotel));
+    pipeline.expire(key, CACHE_TTL_SECONDS);
+    await pipeline.exec();
+  } catch (err: any) {
+    console.warn(`[Redis] Skip cache write (Redis unavailable): ${err.message}`);
   }
-
-  pipeline.expire(key, CACHE_TTL_SECONDS);
-  await pipeline.exec();
 }
 
 export async function getHotelsFromRedis(
@@ -31,15 +32,17 @@ export async function getHotelsFromRedis(
   minPrice?: number,
   maxPrice?: number
 ): Promise<DeduplicatedHotel[]> {
-  const key = getCityKey(city);
+  try {
+    const key = getCityKey(city);
+    const min = minPrice !== undefined ? minPrice : '-inf';
+    const max = maxPrice !== undefined ? maxPrice : '+inf';
 
-  const min = minPrice !== undefined ? minPrice : '-inf';
-  const max = maxPrice !== undefined ? maxPrice : '+inf';
-
-  // Use Redis ZRANGEBYSCORE to filter by price directly inside Redis
-  const rawHotels = await redis.zrangebyscore(key, min, max);
-
-  return rawHotels.map((item) => JSON.parse(item) as DeduplicatedHotel);
+    const rawHotels = await redis.zrangebyscore(key, min, max);
+    return rawHotels.map((item) => JSON.parse(item) as DeduplicatedHotel);
+  } catch (err: any) {
+    console.warn(`[Redis] Skip cache read (Redis unavailable): ${err.message}`);
+    return [];
+  }
 }
 
 export async function checkRedisHealth(): Promise<boolean> {
